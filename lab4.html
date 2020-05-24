@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>V I R T U A L W O R L D : Rainbow Road Lite</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="800" height="600">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <img src="https://play.nintendo.com/images/Masthead_luigi.17345b1513ac044897cfc243542899dce541e8dc.9afde10b.png" width="200" alt="luigi">
+
+    <br />
+    <h3> welcome to rainbow road lite :^) </h3>
+    
+    You can drag the slider to change the camera angle (faster). Also, you can change the pan angle with the cursor (slower, not recommended). 
+    watch out for the blocky loaf in the middle. 
+    
+
+    <br />
+    Camera Angle <input type="range" min="-180" max="180" value="0" class="slider" id="angleSlider">
+    <br />
+
+    <button onclick="toggleAnimation();" type="button">Toggle Animation</button> 
+    <!--<img src="loaf.png" alt="loaf">-->
+
+    
+    <script src="./lib/webgl-utils.js"></script>
+    <script src="./lib/cuon-matrix-cse160.js"></script>
+    <script src="./lib/webgl-debug.js"></script>
+    <script src="./lib/cuon-utils.js"></script>
+    <script src="webgl-helpers.js"></script>
+    <script src="constants.js"></script>
+    <script src="Cube.js"></script>
+    <script src="Camera.js"></script>
+    <script src="lab4.js"></script>
+  </body>
+</html>
