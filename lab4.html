@@ -13,18 +13,18 @@
 
     <br />
     <h3> welcome to rainbow road lite :^) </h3>
-    
-    You can drag the slider to change the camera angle (faster). Also, you can change the pan angle with the cursor (slower, not recommended). 
-    watch out for the blocky loaf in the middle. 
-    
+    Show normal: <input type="checkbox" id="showNormal" class="check">
+    <br />
+    Camera Angle: <input type="range" min="-180" max="180" value="0" class="slider" id="angleSlider">
 
     <br />
-    Camera Angle <input type="range" min="-180" max="180" value="0" class="slider" id="angleSlider">
+    Magenta: <input type="range" min="-180" max="180" value="0" class="slider" id="magentaSlider">
+    Animate <input type="checkbox" id="magentaAnimate" class="check">
     <br />
-
-    <button onclick="toggleAnimation();" type="button">Toggle Animation</button> 
-    <!--<img src="loaf.png" alt="loaf">-->
-
+    Yellow: <input type="range" min="-180" max="180" value="0" class="slider" id="yellowSlider">
+    Animate <input type="checkbox" id="yellowAnimate" class="check">
+    <br />
+    
     
     <script src="./lib/webgl-utils.js"></script>
     <script src="./lib/cuon-matrix-cse160.js"></script>

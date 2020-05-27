@@ -1,23 +1,29 @@
 
 class Cube { 
-  constructor(color='hot pink', texture=3) {
-    // Texture: 1 = yes blocky texture; 0 = no texture
+  constructor(color='hot pink', texture=2) {
+    // Texture: 
+    // 0 = no texture (plain color)
+    // 1 = yes blocky texture
+    // 2 = mixing color and texture
+    // 3 = normal debugging 
+
     this.texture = texture;
     // got tired of converting to percentages and dindt wwant to change them all to 255
     this.rgba = colors[color];
-    this.vertices = new Float32Array(cubeCoords['positions']);
-    this.indices = new Float32Array(cubeCoords['indices']);
-    this.UV = new Float32Array(cubeCoords['texture']);
+    this.vertices = cubeCoords['positions'];
+    this.indices = cubeCoords['indices'];
+    this.UV = cubeCoords['texture'];
+    this.normals = new Float32Array(cubeCoords['normals']);
     this.numFaces = 6;
     this.modelMatrix = new Matrix4();
     this.initColors();
     this._indexBuffer = gl.createBuffer();
       // Create + send data to texture coordinate buffer (attr a_UV)
-    if (this.texture == 1) initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
-  }
-  generateNormals() {
-  
-
+    if (this.texture == 1) {
+      initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
+    } else if (this.texture == 3) {
+      initArrayBuffer(this.normals, 3, gl.FLOAT, 'a_Normal');
+    }
   }
   
   initIndexBuffer() {
@@ -55,8 +61,11 @@ class Cube {
   render() {
     gl.uniformMatrix4fv(u_ModelMatrix, false, this.modelMatrix.elements);
 
-    gl.uniform1i(u_WhichTexture, this.texture);
-
+    if (g_NormalOn) {
+      gl.uniform1i(u_WhichTexture, 3);
+    } else { 
+      gl.uniform1i(u_WhichTexture, this.texture)
+    }
     
     // Create + send data to index buffer
     this.initIndexBuffer();
@@ -69,6 +78,5 @@ class Cube {
 
     // Draw
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-    //debugger;
   }
 }

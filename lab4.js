@@ -38,21 +38,14 @@ const FSHADER_SOURCE = `
   uniform int u_WhichTexture;
   void main() {
     if (u_WhichTexture == 0) {
-      gl_FragColor = v_Color;
+      gl_FragColor = v_Color; // Plain color
     } else if (u_WhichTexture == 1) {
-      gl_FragColor = texture2D(u_Sampler0, v_UV);
-    } else if (u_WhichTexture == 3) {
-      // mixing the color and the texture
-      // additive
-      gl_FragColor = (0.5) * v_Color + 0.5 * texture2D(u_Sampler0, v_UV); // interpolate
-      //gl_FragColor = v_Color - 0.5 * texture2D(u_Sampler0, v_UV); // nice subtractive
-      gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.2 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
+      gl_FragColor = texture2D(u_Sampler0, v_UV); // Plain texture
     } else if (u_WhichTexture == 2) {
-      // mixing the color and the texture
-      gl_FragColor = v_Color * 1.1 + 0.3 - 0.4*texture2D(u_Sampler0, v_UV) ; // secret sauce
-    } else {
-      //gl_FragColor = vec4(v_UV, u_WhichTexture / 10, 1.0);
-      gl_FragColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
+      // Mixing the color and the texture
+      gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.2 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
+    } else if (u_WhichTexture == 3) {
+      gl_FragColor = vec4((v_Normal), 1.0);
     }
   }`;
 
@@ -64,9 +57,50 @@ let {
 } = connectVariablesToGLSL(gl);
 let animate = false;
 let g_GlobalAngle = document.getElementById('angleSlider').value;
+let g_NormalOn = document.getElementById('showNormal').checked;
+let g_YellowAnimate = document.getElementById('yellowAnimate').checked;
+let g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
 let startTime = performance.now();
 let camera = new Camera();
 let counterMouseMove = 0;
+
+setUpEvents = () => {
+  document.getElementById('angleSlider').addEventListener('input', (e) => {
+    g_GlobalAngle = e.target.value;
+    renderAllShapes();
+  });
+  document.getElementById('magentaAnimate').addEventListener('change', (e) => {
+    g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
+    renderAllShapes();
+  });
+
+  document.getElementById('yellowAnimate').addEventListener('change', (e) => {
+    g_NormalOn = document.getElementById('showNormal').checked;
+    g_YellowAnimate = document.getElementById('yellowAnimate').checked;
+    renderAllShapes();
+  });
+
+  document.getElementById('showNormal').addEventListener('change', (e) => {
+    g_NormalOn = document.getElementById('showNormal').checked;
+    renderAllShapes();
+  });
+
+  document.getElementById('magentaSlider').addEventListener('input', (e) => {
+    g_MagentaAnimate = e.target.value;
+    renderAllShapes();
+  });
+
+  document.getElementById('yellowSlider').addEventListener('input', (e) => {
+    g_YellowAnimate = e.target.value;
+    renderAllShapes();
+  });
+
+  // Keydown for moving around / panning
+  document.onkeydown = function(ev){ 
+    keydown(ev); 
+  };
+
+}
 
 main = () => {
   const skyTexImage = initTextures('./skytexture.png');
@@ -76,10 +110,7 @@ main = () => {
   // wait before rendering
   skyTexImage.onload = function() { 
     sendTextureToGLSL(skyTexImage, gl.TEXTURE0); 
-    document.getElementById('angleSlider').addEventListener('input', (e) => {
-      g_GlobalAngle = e.target.value;
-      renderAllShapes();
-    });
+    setUpEvents();
     renderAllShapes();
   };
   /*
@@ -94,13 +125,7 @@ main = () => {
       renderAllShapes();
     }
   });*/
-
-  // Keydown for moving around / panning
-  document.onkeydown = function(ev){ 
-    keydown(ev); 
-  };
 }
-
 
 drawMap = () => {
   for (let x=0; x < 32; x++) {
@@ -127,7 +152,7 @@ initAllShapes = () => {
   shapesList.push(sky);
 
   // Loaf body 
-  let body = new Cube(color='loaf darker');
+  let body = new Cube(color='loaf darker', texture=0);
   body.modelMatrix.scale(
     inchesToGl(16), // long
     inchesToGl(5.5),  // tall
@@ -136,7 +161,7 @@ initAllShapes = () => {
   shapesList.push(body);
 
   // Head
-  let head = new Cube(color='soft ginger');
+  let head = new Cube(color='soft ginger', texture=0);
   head.modelMatrix.translate(-0.6, 0.1, 0.0);
   head.modelMatrix.scale(
     inchesToGl(3), 
@@ -148,7 +173,7 @@ initAllShapes = () => {
 
   // Snoot
   let headCoordMat = new Matrix4(head.modelMatrix);
-  let snoot = new Cube(color='loaf darker');
+  let snoot = new Cube(color='loaf darker', texture=0);
   snoot.modelMatrix = headCoordMat;
   snoot.modelMatrix.translate(-0.8, -0.3, 0.0);
   snoot.modelMatrix.rotate(10, 0, 0, 1);
@@ -160,6 +185,18 @@ initAllShapes = () => {
   snoot.modelMatrix.rotate(10, 0, 0, 1);
   shapesList.push(snoot);
   }
+
+  // Big cube
+  let bigCube = new Cube(color='turquoise', texture=3);
+  bigCube.modelMatrix.scale(
+    0.3, 
+    0.3, 
+    0.3,
+  );
+  bigCube.modelMatrix.translate(5, 0.5, 0);
+  //bigCube.modelMatrix.rotate(15, 0, 1, 0);
+  shapesList.push(bigCube);
+  
 
 keydown = (ev) => {
   switch (ev.keyCode) {

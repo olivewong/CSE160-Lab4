@@ -29,8 +29,9 @@ connectVariablesToGLSL = (gl) => {
   let a_Color = gl.getAttribLocation(gl.program, 'a_Color');
   if (!a_Color) throw 'Failed to get the storage location of a_Color';
 
-  // Get the storage location of a_Color
+  // Get the storage location of a_Normal
   let a_Normal = gl.getAttribLocation(gl.program, 'a_Normal');
+ // debugger;
   if (!a_Normal) throw 'Failed to get the storage location of a_Normal';
 
 
