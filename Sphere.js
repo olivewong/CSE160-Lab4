@@ -10,31 +10,30 @@ class Sphere {
 
     this.texture = texture;
     this.rgba = colors[color];
-    this.numVertices = 195; // for 13
-    this.indices = []
+    this.numVertices = 196; // for 13
+    this.indices = [];
+    this.positions = []
+    this.UV = [];
     /*
     this.UV = cubeCoords['texture'];
     this.normals = new Float32Array(cubeCoords['normals']);*/
     this.modelMatrix = new Matrix4();
-    //this.initColors();
-    //this._indexBuffer = gl.createBuffer();
-      // Create + send data to texture coordinate buffer (attr a_UV)
-      /*
-    if (this.texture == 1) {
-      initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
-    } else if (this.texture == 3) {
-      initArrayBuffer(this.normals, 3, gl.FLOAT, 'a_Normal');
-    }*/
+    this.initColors();
+
+    // Create + send data to index buffer
+    
   }
 
   initVertexBuffers() { // Create a sphere
+    this.positions = [];
+    this.indices = [];
+
     var SPHERE_DIV = 13;
   
     var i, ai, si, ci;
     var j, aj, sj, cj;
     var p1, p2;
-  
-    var positions = [];
+
 
     // Generate coordinates
     for (j = 0; j <= SPHERE_DIV; j++) {
@@ -46,9 +45,10 @@ class Sphere {
         si = Math.sin(ai);
         ci = Math.cos(ai);
   
-        positions.push(si * sj);  // X
-        positions.push(cj);       // Y
-        positions.push(ci * sj);  // Z
+        this.positions.push(si * sj);  // X
+        this.positions.push(cj);       // Y
+        this.positions.push(ci * sj);  // Z
+
       }
     }
   
@@ -70,10 +70,10 @@ class Sphere {
    this.numVertices = Math.max(...this.indices) + 1;
   
     // Create + send data to vertex coordinate buffer (attr a_Color)
-    initArrayBuffer(new Float32Array(positions), 3, gl.FLOAT, 'a_Position');
+    initArrayBuffer(new Float32Array(this.positions), 3, gl.FLOAT, 'a_Position');
 
     // Create + send data to color buffer (attr a_Color)
-    initArrayBuffer(new Float32Array(positions), 3, gl.FLOAT, 'a_Normal');
+    initArrayBuffer(new Float32Array(this.positions), 3, gl.FLOAT, 'a_Normal');
 
     // Unbind the buffer object
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -86,7 +86,7 @@ class Sphere {
     }
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
-    //debugger;
+
     return this.indices.length;
   }
 
@@ -94,10 +94,12 @@ class Sphere {
     // Get color array + add some nice arbitrary shading
     let colors = [];
 
-    for (var j = 0; j < this.indices.length; ++j) {
+    for (var j = 0; j < this.numVertices; j++) {
       let rgbaShading = [];
 
-      for (let i = 0; i < 3; i++) {
+      this.UV.push(0, 0);
+
+      for (let i = 0; i < 3; i++) {1
         rgbaShading.push(this.rgba[i] * (1.3 - j * .15));
       }
       // Keep alpha
@@ -112,7 +114,6 @@ class Sphere {
         rgbaShading.map(x=> x * 1.1),
       );
     }
-    debugger;
     this.colors = new Float32Array(colors);
   }
 
@@ -125,15 +126,12 @@ class Sphere {
       gl.uniform1i(u_WhichTexture, this.texture)
     }
 
-    this.initColors();
-
     // Create + send data to color buffer (attr a_Color)
     initArrayBuffer(this.colors, 4, gl.FLOAT, 'a_Color');
-    
-    // Create + send data to index buffer
-    let n = this.initVertexBuffers();
+    this.n = this.initVertexBuffers();
 
+    initArrayBuffer(new Float32Array(this.UV), 2, gl.FLOAT, 'a_UV');
     // Draw
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, this.n, gl.UNSIGNED_SHORT, 0);
   }
 }
