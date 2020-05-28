@@ -10,11 +10,11 @@ const VSHADER_SOURCE = `
   precision mediump float;
   attribute vec4 a_Position;
   attribute vec2 a_UV;
-  attribute vec3 a_Normal;
+  attribute vec4 a_Normal;
   attribute vec4 a_Color;
   varying vec4 v_Color;
   varying vec2 v_UV;
-  varying vec3 v_Normal;
+  varying vec4 v_Normal;
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_ProjectionMatrix;   // Perspective
   uniform mat4 u_ViewMatrix;         // Look at
@@ -33,7 +33,7 @@ const FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_UV;  
   varying vec4 v_Color;
-  varying vec3 v_Normal;
+  varying vec4 v_Normal;
   uniform sampler2D u_Sampler0;
   uniform int u_WhichTexture;
   void main() {
@@ -45,7 +45,7 @@ const FSHADER_SOURCE = `
       // Mixing the color and the texture
       gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.2 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
     } else if (u_WhichTexture == 3) {
-      gl_FragColor = vec4((v_Normal), 1.0);
+      gl_FragColor = vec4((v_Normal));
     }
   }`;
 
@@ -196,6 +196,15 @@ initAllShapes = () => {
   bigCube.modelMatrix.translate(5, 0.5, 0);
   //bigCube.modelMatrix.rotate(15, 0, 1, 0);
   shapesList.push(bigCube);
+
+  // Sphere
+  let sphere = new Sphere(color='turquoise', texture=3);
+  sphere.modelMatrix.scale(
+    0.3, 
+    0.3, 
+    0.3,
+  );
+  shapesList.push(sphere);
   
 
 keydown = (ev) => {

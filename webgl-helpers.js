@@ -22,7 +22,7 @@ connectVariablesToGLSL = (gl) => {
   if (a_Position < 0) throw 'Failed to get the storage location of a_Position';
 
   // Get the storage location of a_Position
-  let a_UV = 2
+  let a_UV = gl.getAttribLocation(gl.program, 'a_UV');
   if (a_UV < 0) throw 'Failed to get the storage location of a_UV';
 
   // Get the storage location of a_Color

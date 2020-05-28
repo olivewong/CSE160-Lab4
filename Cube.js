@@ -20,7 +20,7 @@ class Cube {
     this._indexBuffer = gl.createBuffer();
       // Create + send data to texture coordinate buffer (attr a_UV)
     if (this.texture == 1) {
-      initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
+      //initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
     } else if (this.texture == 3) {
       initArrayBuffer(this.normals, 3, gl.FLOAT, 'a_Normal');
     }
@@ -56,6 +56,7 @@ class Cube {
       );
     }
     this.colors = new Float32Array(colors);
+
   }
 
   render() {
