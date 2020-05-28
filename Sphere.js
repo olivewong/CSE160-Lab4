@@ -76,8 +76,8 @@ class Sphere {
     if (!indexBuffer) raise ('Failed to create the buffer object');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
-
     return this.indices.length;
+    
   }
 
   initColors() {

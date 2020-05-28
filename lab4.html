@@ -12,7 +12,12 @@
     <!--<img src="https://play.nintendo.com/images/Masthead_luigi.17345b1513ac044897cfc243542899dce541e8dc.9afde10b.png" width="200" alt="luigi">-->
 
     <br />
-    <h3> welcome to rainbow road lite :^) </h3>
+    <h3> Welcome to Rainbow Road Lite (now with lighting!) </h3>
+
+    You can click the checkboxes to disable normal/lighting and use the sliders to control angle and light position.
+    I tried to optimize by having separate render and initialize shape functions to minimize the amount of 
+    re-assigning variables and making new buffers. 
+    <br />
     Show normal: <input type="checkbox" id="showNormal" class="check">
     <br />
     Show lighting: <input type="checkbox" id="showLighting" class="check" checked>
@@ -22,12 +27,13 @@
     Light X: <input type="range" min="-250" max="250" value="0" class="slider" id="lightSlideX">
     Light Y: <input type="range" min="-250" max="250" value="100" class="slider" id="lightSlideY">
     Light Z: <input type="range" min="-250" max="250" value="-200" class="slider" id="lightSlideZ">
+    
     <br />
-    Magenta: <input type="range" min="-180" max="180" value="0" class="slider" id="magentaSlider">
-    Animate <input type="checkbox" id="magentaAnimate" class="check">
+      <input type="range" min="-180" max="180" value="0" class="slider" id="magentaSlider" hidden>
+      <input type="checkbox" id="magentaAnimate" class="check" hidden>
     <br />
-    Yellow: <input type="range" min="-180" max="180" value="0" class="slider" id="yellowSlider">
-    Animate <input type="checkbox" id="yellowAnimate" class="check">
+      <input type="range" min="-180" max="180" value="0" class="slider" id="yellowSlider" hidden>
+     <input type="checkbox" id="yellowAnimate" class="check" hidden>
     <br />
     
     

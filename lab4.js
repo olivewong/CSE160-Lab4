@@ -37,6 +37,7 @@ const FSHADER_SOURCE = `
   varying vec4 v_Color;
   varying vec4 v_Normal;
   varying vec4 v_VertPos;
+  
   uniform sampler2D u_Sampler0;
   uniform int u_WhichTexture;
   uniform int u_LightingOn;
@@ -52,16 +53,29 @@ const FSHADER_SOURCE = `
     } else if (u_WhichTexture == 3) {
       gl_FragColor = vec4(v_Normal[0], v_Normal[1], v_Normal[2], 1.0);
     }
-
-    vec3 lightVector = vec3(v_VertPos) - u_LightPos;
-    float r = length(lightVector); // distance
+    
+    vec3 lightVector = u_LightPos - vec3(v_VertPos);
+    float r = length(lightVector);
     if (u_LightingOn == 1) {
-      if (r < 1.0) {
-        gl_FragColor = vec4(1, 0, 0, 1);
-      } else if (r < 2.0) {
-        gl_FragColor = vec4(0, 1, 0, 1);
-      }
+      //gl_FragColor = vec4(vec3(gl_FragColor) / (r * r), 1);
+      // N dot L
+      vec3 L = normalize(lightVector);
+      vec3 N = normalize(vec3(v_Normal));
+      float nDotL = max(dot(N, L), 0.0);
+
+      // Reflection
+      //vec3 R = reflect(L, N);
+
+     // vec3 E = normalize (u_camer)
+
+
+      vec3 diffuse = vec3(gl_FragColor) * nDotL;
+      vec3 ambient = vec3(gl_FragColor) * nDotL;
+
+      gl_FragColor = vec4(diffuse + ambient, 1.0);
+
     }
+
 
   }
   
@@ -245,6 +259,7 @@ initAllShapes = () => {
   sphere.modelMatrix.translate(5, 1, -3);
 
   shapesList.push(sphere);
+
   }
 
   //light.modelMatrix.setTranslate(-10 , 5 , 0); 
@@ -297,7 +312,7 @@ tick = () => {
 updateAnimationAngles = () => {
   if (g_YellowAnimate) g_yellowAngle = 45 * Math.sin(g_seconds);
   if (g_MagentaAnimate) g_magentaAngle = 45 * Math.sin(3*g_seconds);
-  g_LightPos[1] = Math.cos(g_seconds);
+  g_LightPos[1] = Math.cos(g_seconds) + 1;
 }
 
 renderAllShapes = () => {
@@ -320,16 +335,15 @@ renderAllShapes = () => {
   // Light
   if (g_LightingOn) {
     gl.uniform1i(u_LightingOn, 1);
-    let light = new Cube(color='turquoise', texture=0);
+    let light = new Cube(color='yellow', texture=0);
   
     light.modelMatrix.translate(g_LightPos[0], g_LightPos[1], g_LightPos[2]); 
-    light.modelMatrix.scale(.1, .1, .1);
+    light.modelMatrix.scale(-.1, -.1, -.1);
     
     light.render();
   } else { 
     gl.uniform1i(u_LightingOn, 0);
   }
-
 
   for (shape of shapesList) {
     shape.render();
