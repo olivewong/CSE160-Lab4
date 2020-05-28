@@ -45,7 +45,7 @@ const FSHADER_SOURCE = `
       // Mixing the color and the texture
       gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.2 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
     } else if (u_WhichTexture == 3) {
-      gl_FragColor = vec4((v_Normal));
+      gl_FragColor = vec4(v_Normal[0], v_Normal[1], v_Normal[2], 1.0);
     }
   }`;
 
@@ -75,7 +75,6 @@ setUpEvents = () => {
   });
 
   document.getElementById('yellowAnimate').addEventListener('change', (e) => {
-    g_NormalOn = document.getElementById('showNormal').checked;
     g_YellowAnimate = document.getElementById('yellowAnimate').checked;
     renderAllShapes();
   });
@@ -136,7 +135,7 @@ drawMap = () => {
         // make rainbow
         body.modelMatrix.translate(0, -.75, 0)
         body.modelMatrix.scale(.3, .3, .3)
-        body.modelMatrix.translate(x* 2 - 32, 0, y * 2 - 32);
+        body.modelMatrix.translate(x * 2 - 32, 0, y * 2 - 32);
         shapesList.push(body);
       }
     }
@@ -193,17 +192,18 @@ initAllShapes = () => {
     0.3, 
     0.3,
   );
-  bigCube.modelMatrix.translate(5, 0.5, 0);
+  bigCube.modelMatrix.translate(5, 1, 0);
   //bigCube.modelMatrix.rotate(15, 0, 1, 0);
   shapesList.push(bigCube);
 
   // Sphere
   let sphere = new Sphere(color='turquoise', texture=3);
   sphere.modelMatrix.scale(
-    0.3, 
-    0.3, 
-    0.3,
+    0.4, 
+    0.4, 
+    0.4,
   );
+  sphere.modelMatrix.translate(5, 1, -3);
   shapesList.push(sphere);
   
 

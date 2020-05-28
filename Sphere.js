@@ -80,10 +80,7 @@ class Sphere {
   
     // Write the indices to the buffer object
     var indexBuffer = gl.createBuffer();
-    if (!indexBuffer) {
-      console.log('Failed to create the buffer object');
-      return -1;
-    }
+    if (!indexBuffer) raise ('Failed to create the buffer object');
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
 
@@ -96,9 +93,7 @@ class Sphere {
 
     for (var j = 0; j < this.numVertices; j++) {
       let rgbaShading = [];
-
       this.UV.push(0, 0);
-
       for (let i = 0; i < 3; i++) {1
         rgbaShading.push(this.rgba[i] * (1.3 - j * .15));
       }
@@ -120,9 +115,11 @@ class Sphere {
   render() {
     gl.uniformMatrix4fv(u_ModelMatrix, false, this.modelMatrix.elements);
 
-    if (g_NormalOn) {
+    if (this.texture == 3 || g_NormalOn) {
       gl.uniform1i(u_WhichTexture, 3);
-    } else { 
+      initArrayBuffer(this.positions, 3, gl.FLOAT, 'a_Normal');
+    } else if (this.texture == 1) {
+      initArrayBuffer(this.UV, 2, gl.FLOAT, 'a_UV');
       gl.uniform1i(u_WhichTexture, this.texture)
     }
 
