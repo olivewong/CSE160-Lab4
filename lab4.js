@@ -39,6 +39,7 @@ const FSHADER_SOURCE = `
   varying vec4 v_VertPos;
   uniform sampler2D u_Sampler0;
   uniform int u_WhichTexture;
+  uniform int u_LightingOn;
   uniform vec3 u_LightPos;
   void main() {
     if (u_WhichTexture == 0) {
@@ -54,11 +55,14 @@ const FSHADER_SOURCE = `
 
     vec3 lightVector = vec3(v_VertPos) - u_LightPos;
     float r = length(lightVector); // distance
-    if (r < 1.0) {
-      gl_FragColor = vec4(1, 0, 0, 1);
-    } else if (r < 2.0) {
-      gl_FragColor = vec4(0, 1, 0, 1);
+    if (u_LightingOn == 1) {
+      if (r < 1.0) {
+        gl_FragColor = vec4(1, 0, 0, 1);
+      } else if (r < 2.0) {
+        gl_FragColor = vec4(0, 1, 0, 1);
+      }
     }
+
   }
   
   `;
@@ -67,11 +71,12 @@ const FSHADER_SOURCE = `
 let shapesList = [];
 const {gl, canvas} = setUpWebGL();
 let {
-  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture 
+  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn 
 } = connectVariablesToGLSL(gl);
 let animate = false;
 let g_GlobalAngle = document.getElementById('angleSlider').value;
 let g_NormalOn = document.getElementById('showNormal').checked;
+let g_LightingOn = document.getElementById('showLighting').checked;
 let g_YellowAnimate = document.getElementById('yellowAnimate').checked;
 let g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
 let g_LightPos = [0.58, 0.21, -.86];
@@ -110,6 +115,11 @@ setUpEvents = () => {
     g_NormalOn = document.getElementById('showNormal').checked;
     renderAllShapes();
   });
+  document.getElementById('showLighting').addEventListener('change', (e) => {
+    g_LightingOn = document.getElementById('showLighting').checked;
+    if (g_LightingOn) tick();
+    renderAllShapes();
+  });
 
   document.getElementById('magentaSlider').addEventListener('input', (e) => {
     g_MagentaAnimate = e.target.value;
@@ -125,6 +135,7 @@ setUpEvents = () => {
   document.onkeydown = function(ev){ 
     keydown(ev); 
   };
+  if (g_LightingOn) tick();
 
 }
 
@@ -151,6 +162,7 @@ main = () => {
       renderAllShapes();
     }
   });*/
+  tick();
 }
 
 drawMap = () => {
@@ -271,10 +283,24 @@ keydown = (ev) => {
   renderAllShapes();
 }
 
+let g_startTime = performance.now() / 1000.0;
+let g_seconds = performance.now() / 1000.0 - g_startTime;
+
+tick = () => {
+  g_seconds = performance.now() / 1000.0 - g_startTime;
+
+  updateAnimationAngles();
+  renderAllShapes();
+  if (g_LightingOn) requestAnimationFrame(tick);
+}
+
+updateAnimationAngles = () => {
+  if (g_YellowAnimate) g_yellowAngle = 45 * Math.sin(g_seconds);
+  if (g_MagentaAnimate) g_magentaAngle = 45 * Math.sin(3*g_seconds);
+  g_LightPos[1] = Math.cos(g_seconds);
+}
 
 renderAllShapes = () => {
-
-
   // Pass the matrix to u_GlobalRotateMatrix 
   let globalRotationMatrix = new Matrix4().rotate(g_GlobalAngle, 0, 1, 0);
   //globalRotationMatrix.rotate(-5, 1, 0, 0); // arbitrary, just for perspective
@@ -291,13 +317,19 @@ renderAllShapes = () => {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // Light
-  let light = new Cube(color='turquoise', texture=0);
-  light.modelMatrix.translate(g_LightPos[0], g_LightPos[1], g_LightPos[2]); 
-  light.modelMatrix.scale(.1, .1, .1);
+  // Light
+  if (g_LightingOn) {
+    gl.uniform1i(u_LightingOn, 1);
+    let light = new Cube(color='turquoise', texture=0);
   
-  light.render();
+    light.modelMatrix.translate(g_LightPos[0], g_LightPos[1], g_LightPos[2]); 
+    light.modelMatrix.scale(.1, .1, .1);
     
+    light.render();
+  } else { 
+    gl.uniform1i(u_LightingOn, 0);
+  }
+
 
   for (shape of shapesList) {
     shape.render();

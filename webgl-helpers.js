@@ -61,8 +61,11 @@ connectVariablesToGLSL = (gl) => {
   let u_WhichTexture = gl.getUniformLocation(gl.program, 'u_WhichTexture');
   if (!u_WhichTexture) throw 'Failed to get the storage location of u_WhichTexture';
 
+  let u_LightingOn = gl.getUniformLocation(gl.program, 'u_LightingOn');
+  if (!u_LightingOn) throw 'Failed to get the storage location of u_igihtinigon';
+
   return {
-    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture
+    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn
   }
 }
 
