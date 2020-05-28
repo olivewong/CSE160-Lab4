@@ -64,8 +64,13 @@ connectVariablesToGLSL = (gl) => {
   let u_LightingOn = gl.getUniformLocation(gl.program, 'u_LightingOn');
   if (!u_LightingOn) throw 'Failed to get the storage location of u_igihtinigon';
 
+
+  let u_CameraPos = gl.getUniformLocation(gl.program, 'u_CameraPos');
+  if (!u_CameraPos) throw 'Failed to get the storage location of u_CameraPos';
+
   return {
-    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn
+    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, 
+    u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn, u_CameraPos
   }
 }
 

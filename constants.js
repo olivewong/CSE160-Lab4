@@ -16,6 +16,8 @@ const colors = { // rgba
   'softer ginger': [0.86, 0.61, 0.47, 0.8],
   'soft ginger': [0.86, 0.61, 0.47, 1],
   'nose brown': [0.37, 0.22, 0.07, 1 ],
+  'white': [1.0, 1, 1, 1 ],
+  'light yellow': [1.0, 0.7, 0.6, 1],
 }
 
 const g_map = [

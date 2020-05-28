@@ -42,6 +42,7 @@ const FSHADER_SOURCE = `
   uniform int u_WhichTexture;
   uniform int u_LightingOn;
   uniform vec3 u_LightPos;
+  uniform vec3 u_CameraPos;
   void main() {
     if (u_WhichTexture == 0) {
       gl_FragColor = v_Color; // Plain color
@@ -49,7 +50,7 @@ const FSHADER_SOURCE = `
       gl_FragColor = texture2D(u_Sampler0, v_UV); // Plain texture
     } else if (u_WhichTexture == 2) {
       // Mixing the color and the texture
-      gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.2 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
+      gl_FragColor = (v_Color - 0.4 * texture2D(u_Sampler0, v_UV))+ 0.3 * v_Color* texture2D(u_Sampler0, v_UV); // secret sauce
     } else if (u_WhichTexture == 3) {
       gl_FragColor = vec4(v_Normal[0], v_Normal[1], v_Normal[2], 1.0);
     }
@@ -64,19 +65,18 @@ const FSHADER_SOURCE = `
       float nDotL = max(dot(N, L), 0.0);
 
       // Reflection
-      //vec3 R = reflect(L, N);
-
-     // vec3 E = normalize (u_camer)
-
+      vec3 R = reflect(L, N);
+      // Eye
+      vec3 E = normalize (u_CameraPos - vec3(v_VertPos) );
+      // Specular
+      float specular = pow(max(dot(E, R), 0.0), 10.0);
 
       vec3 diffuse = vec3(gl_FragColor) * nDotL;
       vec3 ambient = vec3(gl_FragColor) * nDotL;
 
-      gl_FragColor = vec4(diffuse + ambient, 1.0);
+      gl_FragColor = vec4(specular + diffuse + ambient, 1.0);
 
     }
-
-
   }
   
   `;
@@ -85,7 +85,8 @@ const FSHADER_SOURCE = `
 let shapesList = [];
 const {gl, canvas} = setUpWebGL();
 let {
-  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn 
+  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, 
+  u_Sampler, u_LightPos, u_WhichTexture, u_LightingOn, u_CameraPos 
 } = connectVariablesToGLSL(gl);
 let animate = false;
 let g_GlobalAngle = document.getElementById('angleSlider').value;
@@ -93,7 +94,7 @@ let g_NormalOn = document.getElementById('showNormal').checked;
 let g_LightingOn = document.getElementById('showLighting').checked;
 let g_YellowAnimate = document.getElementById('yellowAnimate').checked;
 let g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
-let g_LightPos = [0.58, 0.21, -.86];
+let g_LightPos = [2.5, 0.21, -.3];
 let startTime = performance.now();
 let camera = new Camera();
 let counterMouseMove = 0;
@@ -239,7 +240,7 @@ initAllShapes = () => {
   
 
   // Big cube
-  let bigCube = new Cube(color='turquoise', texture=3);
+  let bigCube = new Cube(color='turquoise', texture=2);
   bigCube.modelMatrix.scale(
     0.3, 
     0.3, 
@@ -261,11 +262,6 @@ initAllShapes = () => {
   shapesList.push(sphere);
 
   }
-
-  //light.modelMatrix.setTranslate(-10 , 5 , 0); 
-  // far, x , left/right
-  //gl.uniform3f(u_LightPos, g_LightPos[0] / 10 , g_LightPos[1] / 10 , g_LightPos[2] / 10);
-  //shapesList.push(light);
   
 
 keydown = (ev) => {
@@ -312,7 +308,7 @@ tick = () => {
 updateAnimationAngles = () => {
   if (g_YellowAnimate) g_yellowAngle = 45 * Math.sin(g_seconds);
   if (g_MagentaAnimate) g_magentaAngle = 45 * Math.sin(3*g_seconds);
-  g_LightPos[1] = Math.cos(g_seconds) + 1;
+  g_LightPos[1] = Math.cos(g_seconds) + 0.75;
 }
 
 renderAllShapes = () => {
@@ -328,6 +324,7 @@ renderAllShapes = () => {
   gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMat);
 
   gl.uniform3f(u_LightPos, g_LightPos[0], g_LightPos[1], g_LightPos[2]);
+  gl.uniform3f(u_CameraPos, camera.eye[0], camera.eye[1], camera.eye[2]);
 
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -335,7 +332,7 @@ renderAllShapes = () => {
   // Light
   if (g_LightingOn) {
     gl.uniform1i(u_LightingOn, 1);
-    let light = new Cube(color='yellow', texture=0);
+    let light = new Cube(color='light yellow', texture=0);
   
     light.modelMatrix.translate(g_LightPos[0], g_LightPos[1], g_LightPos[2]); 
     light.modelMatrix.scale(-.1, -.1, -.1);

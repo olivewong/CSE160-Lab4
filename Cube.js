@@ -43,17 +43,17 @@ class Cube {
       // Subtract .08 from alpha for each face to simulate shading
       // IF U PUT I < 4 + KEEP ALPHA IT MAKES IT RAINBOW 
       for (let i = 0; i < 3; i++) {
-        rgbaShading.push(this.rgba[i] * (1.3 - j * .15));
+        rgbaShading.push(this.rgba[i] - i * 0.08);
       }
       // Keep alpha
       rgbaShading.push(this.rgba[3])
 
       // Repeat each color four times for the four vertices of the face
       colors = colors.concat(
-        rgbaShading.map(x=> x*0.5 ),  // make it gradienty,
+        rgbaShading.map(x=> x*0.7 ),  // make it gradienty,
         rgbaShading.map(x=> x += (Math.random() - 0.5) * 0.2),
         rgbaShading,
-        rgbaShading.map(x=> x * 1.1),
+        rgbaShading,
       );
     }
     this.colors = new Float32Array(colors);
