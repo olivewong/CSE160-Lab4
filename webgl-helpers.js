@@ -34,6 +34,8 @@ connectVariablesToGLSL = (gl) => {
  // debugger;
   if (!a_Normal) throw 'Failed to get the storage location of a_Normal';
 
+  let u_LightPos = gl.getUniformLocation(gl.program, 'u_LightPos');
+  if (!u_LightPos) throw 'Failed to get the storage location of u_LightPos';
 
   // Holds all the transformations and pass when drawing
   let u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
@@ -60,7 +62,7 @@ connectVariablesToGLSL = (gl) => {
   if (!u_WhichTexture) throw 'Failed to get the storage location of u_WhichTexture';
 
   return {
-    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_WhichTexture
+    a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture
   }
 }
 

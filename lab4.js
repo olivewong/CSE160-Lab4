@@ -14,6 +14,7 @@ const VSHADER_SOURCE = `
   attribute vec4 a_Color;
   varying vec4 v_Color;
   varying vec2 v_UV;
+  varying vec4 v_VertPos;
   varying vec4 v_Normal;
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_ProjectionMatrix;   // Perspective
@@ -26,6 +27,7 @@ const VSHADER_SOURCE = `
     v_Color = a_Color;
     v_UV = a_UV;
     v_Normal = a_Normal;
+    v_VertPos = u_ModelMatrix * a_Position;
   }`;
 
 // Fragment shader program
@@ -34,8 +36,10 @@ const FSHADER_SOURCE = `
   varying vec2 v_UV;  
   varying vec4 v_Color;
   varying vec4 v_Normal;
+  varying vec4 v_VertPos;
   uniform sampler2D u_Sampler0;
   uniform int u_WhichTexture;
+  uniform vec3 u_LightPos;
   void main() {
     if (u_WhichTexture == 0) {
       gl_FragColor = v_Color; // Plain color
@@ -47,19 +51,30 @@ const FSHADER_SOURCE = `
     } else if (u_WhichTexture == 3) {
       gl_FragColor = vec4(v_Normal[0], v_Normal[1], v_Normal[2], 1.0);
     }
-  }`;
+
+    vec3 lightVector = vec3(v_VertPos) - u_LightPos;
+    float r = length(lightVector); // distance
+    if (r < 1.0) {
+      gl_FragColor = vec4(1, 0, 0, 1);
+    } else if (r < 2.0) {
+      gl_FragColor = vec4(0, 1, 0, 1);
+    }
+  }
+  
+  `;
 
 
 let shapesList = [];
 const {gl, canvas} = setUpWebGL();
 let {
-  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_WhichTexture 
+  a_Position, a_UV, a_Color, a_Normal, u_ModelMatrix, u_GlobalRotateMatrix, u_ViewMatrix, u_ProjectionMatrix, u_Sampler, u_LightPos, u_WhichTexture 
 } = connectVariablesToGLSL(gl);
 let animate = false;
 let g_GlobalAngle = document.getElementById('angleSlider').value;
 let g_NormalOn = document.getElementById('showNormal').checked;
 let g_YellowAnimate = document.getElementById('yellowAnimate').checked;
 let g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
+let g_LightPos = [0.58, 0.21, -.86];
 let startTime = performance.now();
 let camera = new Camera();
 let counterMouseMove = 0;
@@ -69,11 +84,23 @@ setUpEvents = () => {
     g_GlobalAngle = e.target.value;
     renderAllShapes();
   });
+  document.getElementById('lightSlideX').addEventListener('input', (e) => {
+    g_LightPos[0] = e.target.value / 100.0;
+    // todo change divisor to make more dramatic
+    renderAllShapes();
+  });
+  document.getElementById('lightSlideY').addEventListener('input', (e) => {
+    g_LightPos[1] = e.target.value / 100.0;
+    renderAllShapes();
+  });
+  document.getElementById('lightSlideZ').addEventListener('input', (e) => {
+    g_LightPos[2] = e.target.value / 100.0;
+    renderAllShapes();
+  });
   document.getElementById('magentaAnimate').addEventListener('change', (e) => {
     g_MagentaAnimate = document.getElementById('magentaAnimate').checked;
     renderAllShapes();
   });
-
   document.getElementById('yellowAnimate').addEventListener('change', (e) => {
     g_YellowAnimate = document.getElementById('yellowAnimate').checked;
     renderAllShapes();
@@ -183,7 +210,7 @@ initAllShapes = () => {
   );
   snoot.modelMatrix.rotate(10, 0, 0, 1);
   shapesList.push(snoot);
-  }
+  
 
   // Big cube
   let bigCube = new Cube(color='turquoise', texture=3);
@@ -204,7 +231,14 @@ initAllShapes = () => {
     0.4,
   );
   sphere.modelMatrix.translate(5, 1, -3);
+
   shapesList.push(sphere);
+  }
+
+  //light.modelMatrix.setTranslate(-10 , 5 , 0); 
+  // far, x , left/right
+  //gl.uniform3f(u_LightPos, g_LightPos[0] / 10 , g_LightPos[1] / 10 , g_LightPos[2] / 10);
+  //shapesList.push(light);
   
 
 keydown = (ev) => {
@@ -239,6 +273,8 @@ keydown = (ev) => {
 
 
 renderAllShapes = () => {
+
+
   // Pass the matrix to u_GlobalRotateMatrix 
   let globalRotationMatrix = new Matrix4().rotate(g_GlobalAngle, 0, 1, 0);
   //globalRotationMatrix.rotate(-5, 1, 0, 0); // arbitrary, just for perspective
@@ -250,8 +286,18 @@ renderAllShapes = () => {
   // Pass the view matrix
   gl.uniformMatrix4fv(u_ViewMatrix, false, camera.viewMat);
 
+  gl.uniform3f(u_LightPos, g_LightPos[0], g_LightPos[1], g_LightPos[2]);
+
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Light
+  let light = new Cube(color='turquoise', texture=0);
+  light.modelMatrix.translate(g_LightPos[0], g_LightPos[1], g_LightPos[2]); 
+  light.modelMatrix.scale(.1, .1, .1);
+  
+  light.render();
+    
 
   for (shape of shapesList) {
     shape.render();

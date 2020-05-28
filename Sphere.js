@@ -14,14 +14,8 @@ class Sphere {
     this.indices = [];
     this.positions = []
     this.UV = [];
-    /*
-    this.UV = cubeCoords['texture'];
-    this.normals = new Float32Array(cubeCoords['normals']);*/
     this.modelMatrix = new Matrix4();
     this.initColors();
-
-    // Create + send data to index buffer
-    
   }
 
   initVertexBuffers() { // Create a sphere
@@ -48,7 +42,6 @@ class Sphere {
         this.positions.push(si * sj);  // X
         this.positions.push(cj);       // Y
         this.positions.push(ci * sj);  // Z
-
       }
     }
   
